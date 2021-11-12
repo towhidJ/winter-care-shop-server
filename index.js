@@ -27,6 +27,17 @@ async function run() {
         const reviewsCollection = database.collection('reviews');
 
 
+
+        app.get('/dashboard',async(req,res)=>{
+            const productCursor = productsCollection.find({});
+            const productCount =await productCursor.count();
+            const orderCursor = ordersCollection.find({});
+            const orderCount =await orderCursor.count();
+            const userCursor = usersCollection.find({});
+            const userCount =await userCursor.count();
+            res.send({productCount,orderCount,userCount})
+        } )
+
         //Get Products
         app.get('/products',async (req,res)=>{
             const cursor = productsCollection.find({});
@@ -195,7 +206,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get('/', (req, res) => {
-    res.send('Hello Doctors portal!')
+    res.send('Hello Customer!')
 })
 
 app.listen(port, () => {
