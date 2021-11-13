@@ -86,7 +86,7 @@ async function run() {
 
         //Get Order
         app.get('/orders',async (req,res)=>{
-            const cursor = ordersCollection.find({});
+            const cursor = ordersCollection.find({}).sort({_id:-1});
             const orders = await cursor.toArray();
             res.json(orders);
         })
@@ -185,7 +185,7 @@ async function run() {
 
         //Get Review
         app.get('/reviews', async (req, res) => {
-            const cursor = reviewsCollection.find({});
+            const cursor = reviewsCollection.find({}).sort({_id:-1});
             const result = await cursor.toArray();
             res.json(result);
         });
