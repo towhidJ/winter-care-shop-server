@@ -40,7 +40,7 @@ async function run() {
 
         //Get Products
         app.get('/products',async (req,res)=>{
-            const cursor = productsCollection.find({});
+            const cursor = productsCollection.find({}).sort({_id: -1});
             const count =await cursor.count();
             const page = req.query.page;
             const size = parseInt(req.query.size);
