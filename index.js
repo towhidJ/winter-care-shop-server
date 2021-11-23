@@ -3,6 +3,7 @@ const app = express()
 const cors = require('cors');
 const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
 const { MongoClient } = require('mongodb');
 
 const port = process.env.PORT || 5000;
@@ -90,6 +91,27 @@ async function run() {
             const orders = await cursor.toArray();
             res.json(orders);
         })
+        //Get Order by id
+        app.get('/orders/:id',async (req,res)=>{
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)};
+            const order = await ordersCollection.findOne(query)
+
+            res.json(order);
+        })
+
+        app.put('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    payment: payment
+                }
+            };
+            const result = await ordersCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        });
 
         //Add orders
         app.post('/orders',async (req,res)=>{
@@ -164,6 +186,22 @@ async function run() {
 
         });
 
+        //use post to Get Products By Key
+        app.post('/products/byId',async (req,res)=>{
+            const keys = req.body;
+            let a =[];
+            for(const k of keys)
+            {
+                a.push(ObjectId(k));
+            }
+
+            const query = {_id:{$in:a}}
+            console.log(query);
+            const products = await productsCollection.find(query).toArray();
+            console.log(products)
+            res.json(products)
+        })
+
         app.put('/users/admin', async (req, res) => {
             const user = req.body;
             const requester = user.adminMail;
@@ -196,6 +234,17 @@ async function run() {
             const result = await reviewsCollection.insertOne(review);
             res.json(result);
         });
+
+        app.post('/create-payment-intent', async (req, res) => {
+            const paymentInfo = req.body;
+            const amount = paymentInfo.price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: 'usd',
+                amount: amount,
+                payment_method_types: ['card']
+            });
+            res.json({ clientSecret: paymentIntent.client_secret })
+        })
 
     }
     finally {
