@@ -11,7 +11,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5cmdn.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.nlea3gs.mongodb.net`;
 const client = new MongoClient(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -147,7 +147,13 @@ async function run() {
             res.send(result);
         });
 
-        //Get Products
+        //Get Users
+        
+        app.get("/users", async (req, res) => {
+            const cursor = usersCollection.find({}).sort({ _id: -1 });
+            const users = await cursor.toArray();
+            res.json(users);
+        });
 
         app.get("/users/:email", async (req, res) => {
             const email = req.params.email;
@@ -167,12 +173,11 @@ async function run() {
             const user = req.body;
             user.role = "user";
             const result = await usersCollection.insertOne(user);
-            console.log(result);
-            res.json(result);
+            res.json({status:200,message:"User Create success"});
         });
 
         app.put("/users", async (req, res) => {
-            console.log(req.bosy);
+            console.log(req.body);
             const user = req.body;
             const requester = user.email;
             const requesterAccount = await usersCollection.findOne({
